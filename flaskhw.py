@@ -110,5 +110,33 @@ def upload_image():
     file_url = f"/{UPLOAD_FOLDER}/{file.filename}"
     return jsonify({"url": file_url}), 200
 
+@app.route("/add_movie", methods=["POST"])
+def add_movie():
+    data = request.json
+    title = data.get("title")
+    image_url = data.get("image")
+    background_url = data.get("background")  # Add this field
+
+    if not title or not image_url or not background_url:
+        return jsonify({"error": "Movie title, image, and background are required"}), 400
+
+    new_movie = {
+        "id": len(movies) + 1,
+        "title": title,
+        "image": image_url,
+        "background": background_url,
+        "times": ["12:00", "14:00", "16:30", "20:00"],
+        "tickets": {}
+    }
+    movies.append(new_movie)
+
+    return jsonify({"message": "Movie added successfully"}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+    
+    
+    
+    
+    

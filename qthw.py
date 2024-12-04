@@ -1,10 +1,13 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea, QGridLayout, QHBoxLayout
+    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea, QGridLayout, QHBoxLayout, QMessageBox, QLineEdit, QFileDialog
 )
 from PyQt5.QtGui import QPixmap, QFont, QPalette, QBrush
 from PyQt5.QtCore import Qt
 import sys
+import requests
 
+
+API_URL = "https://sakojadi.pythonanywhere.com"
 
 class MovieDetailWindow(QWidget):
     def __init__(self, movie_info, username):
@@ -13,69 +16,53 @@ class MovieDetailWindow(QWidget):
         self.setFixedSize(800, 600)
         self.username = username
 
-        # Manually set the background image based on the movie title
-        backgrounds = {
-            "гладиатор 2": "images.jpg",
-            "начало последствий": "background_beggining.jpg",
-            "моана 2: возвращение": "background_moana.jpg",
-            "красный дракон": "background_red_dragon.jpg",
-            "огненный шторм": "background_firestorm.jpg",
-            "красный рассвет": "background_red_dawn.jpg",
-            "гладиатор 2: судьба Рима": "background_gladiator_fate.jpg",
-            "начало новой эры": "background_new_era.jpg",
-            "моана 2: новые горизонты": "background_moana_horizons.jpg",
-        }
-        background_image = backgrounds.get(movie_info["title"], "default_background.jpg")
+        # Dynamically load the background image
+        background_url = movie_info.get("background", "default_background.jpg")
+        background_pixmap = QPixmap()
+        background_pixmap.loadFromData(requests.get(f"{API_URL}{background_url}").content)
 
-        # Фоновое изображение
         self.background_label = QLabel(self)
-        self.background_label.setPixmap(QPixmap(background_image).scaled(
-            self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
-        ))
+        self.background_label.setPixmap(
+            background_pixmap.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+        )
         self.background_label.setGeometry(0, 0, 800, 600)
 
-        # Полупрозрачный затемняющий слой
+        # Poluprozrachnyy overlay
         self.overlay = QLabel(self)
         self.overlay.setGeometry(0, 0, 800, 600)
         self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
 
-        # Main layout for the detail window
+        # Main layout
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignCenter)
 
-        # Black rectangle container
+        # Black container for content
         content_container = QWidget()
-        content_container.setStyleSheet(
-            "background-color: rgba(0, 0, 0, 0.8); border-radius: 15px;")
-        content_container.setFixedSize(400, 340)  # Adjust dimensions as needed
+        content_container.setStyleSheet("background-color: rgba(0, 0, 0, 0.8); border-radius: 15px;")
+        content_container.setFixedSize(400, 340)
 
         container_layout = QVBoxLayout()
         container_layout.setAlignment(Qt.AlignCenter)
 
-        # Movie title
+        # Movie Title
         title_label = QLabel(movie_info["title"])
         title_label.setFont(QFont("Arial", 24, QFont.Bold))
-        title_label.setStyleSheet("color: white;")  # Remove padding and background
+        title_label.setStyleSheet("color: white;")
         title_label.setAlignment(Qt.AlignCenter)
         container_layout.addWidget(title_label)
 
-        # Show available times
-        times = ["12:00", "14:00", "16:30", "20:00"]
-        for time in times:
+        # Dynamic Showtimes
+        for time in movie_info["times"]:
             time_button = QPushButton(time)
             time_button.setFixedSize(100, 40)
-            time_button.setStyleSheet(
-                "background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;"
-            )
+            time_button.setStyleSheet("background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;")
             container_layout.addWidget(time_button, alignment=Qt.AlignCenter)
             time_button.clicked.connect(lambda _, t=time: self.book_open(movie_info["title"], t, self.username))
 
-        # Back button
+        # Back Button
         back_button = QPushButton("назад")
         back_button.setFixedSize(100, 40)
-        back_button.setStyleSheet(
-            "background-color: #A72323; color: white; font-size: 14px; border-radius: 10px; border: none;"
-        )
+        back_button.setStyleSheet("background-color: #A72323; color: white; font-size: 14px; border-radius: 10px; border: none;")
         back_button.clicked.connect(self.close)
         container_layout.addWidget(back_button, alignment=Qt.AlignCenter)
 
@@ -83,11 +70,11 @@ class MovieDetailWindow(QWidget):
         main_layout.addWidget(content_container)
 
         self.setLayout(main_layout)
-        
+
     def book_open(self, movie_title, movie_time, username):
         from book import SeatSelectionWindow
-        b = SeatSelectionWindow(movie_title, movie_time, username)
-        b.show()
+        self.seat_selection_window = SeatSelectionWindow(movie_title, movie_time, username)
+        self.seat_selection_window.show()
 
 
 class MovieWindow(QWidget):
@@ -97,6 +84,7 @@ class MovieWindow(QWidget):
         self.setFixedSize(800, 600)
         self.setStyleSheet("background-color: #1E1E1E;")  # Dark gray background
         self.username = username 
+        self.movie_data = []
         
         # Main layout
         main_layout = QVBoxLayout()
@@ -121,75 +109,152 @@ class MovieWindow(QWidget):
         add_button.setStyleSheet(
             "background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;"
         )
+        add_button.clicked.connect(self.open_add_movie_window)
         header_layout.addWidget(add_button)
         main_layout.addLayout(header_layout)
 
-        # Scroll area
+        # Scroll area for movie posters
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setStyleSheet("border: none;")
 
-        # Movies container
+        # Movies container (grid layout)
         scroll_content = QWidget()
         central_layout = QVBoxLayout(scroll_content)
         central_layout.setAlignment(Qt.AlignCenter)
 
-        movies_layout = QGridLayout()
-        movies_layout.setAlignment(Qt.AlignCenter)
-        movies_layout.setHorizontalSpacing(20)
-        movies_layout.setVerticalSpacing(20)
-
-        # Movie data: (image_path, title)
-        self.movies = [
-            {"image": "gladiator.jpg", "title": "гладиатор 2"},
-            {"image": "beggining.jpg", "title": "начало последствий"},
-            {"image": "moana.jpg", "title": "моана 2: возвращение"},
-            {"image": "red.jpg", "title": "красный дракон"},
-            {"image": "red.jpg", "title": "огненный шторм"},
-            {"image": "red.jpg", "title": "красный рассвет"},
-            {"image": "gladiator.jpg", "title": "гладиатор 2: судьба Рима"},
-            {"image": "beggining.jpg", "title": "начало новой эры"},
-            {"image": "moana.jpg", "title": "моана 2: новые горизонты"},
-        ]
-
-        for i, movie in enumerate(self.movies):
-            # Movie button (image + title combined)
-            movie_button = QPushButton()
-            movie_button.setFixedSize(150, 220)
-            movie_button.setStyleSheet("border: none; background-color: black;")
-            movie_button.clicked.connect(lambda checked, m=movie: self.open_movie_detail(m,self.username))
-
-            # Add poster
-            pixmap = QPixmap(movie["image"]).scaled(150, 200, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
-            movie_label = QLabel(movie_button)
-            movie_label.setPixmap(pixmap)
-            movie_label.setAlignment(Qt.AlignCenter)
-
-            # Overlay for title
-            overlay = QLabel(movie_button)
-            overlay.setText(movie["title"])
-            overlay.setFont(QFont("Arial", 10, QFont.Bold))
-            overlay.setStyleSheet(
-                "color: white; background-color: rgba(0, 0, 0, 0.7); padding: 5px;"
-            )
-            overlay.setAlignment(Qt.AlignCenter)
-            overlay.setFixedHeight(30)
-            overlay.setFixedWidth(150)
-            overlay.move(0, 190)
-
-            # Add to grid
-            movies_layout.addWidget(movie_button, i // 4, i % 4)
+        self.movies_layout = QGridLayout()
+        self.movies_layout.setAlignment(Qt.AlignCenter)
+        self.movies_layout.setHorizontalSpacing(20)
+        self.movies_layout.setVerticalSpacing(20)
+        
+        self.setLayout(main_layout)
+        self.fetch_movies() 
 
         # Add movies_layout to central_layout
-        central_layout.addLayout(movies_layout)
+        central_layout.addLayout(self.movies_layout)
         scroll_area.setWidget(scroll_content)
 
         # Add scroll area to the main layout
         main_layout.addWidget(scroll_area)
 
         self.setLayout(main_layout)
+        
+    def fetch_movies(self):
+        response = requests.get(f"{API_URL}/movies")
+        if response.status_code == 200:
+            self.movie_data = response.json()["movies"]  # Access the list properly
+            self.update_movie_list()
+        else:
+            print("Failed to fetch movies")
 
-    def open_movie_detail(self, movie, username):
-        self.detail_window = MovieDetailWindow(movie, username)
-        self.detail_window.show()
+    def update_movie_list(self):
+        while self.movies_layout.count():
+            child = self.movies_layout.takeAt(0).widget()
+            if child:
+                child.deleteLater()
+
+        for i, movie in enumerate(self.movie_data):
+            movie_button = QPushButton()
+            movie_button.setFixedSize(150, 220)
+            movie_button.setStyleSheet("border: none; background-color: black;")
+            movie_button.clicked.connect(lambda checked, m=movie: self.show_movie_details(m))
+
+            # Display image using URL
+            pixmap = QPixmap()
+            pixmap.loadFromData(requests.get(f"{API_URL}{movie['image']}").content)
+            movie_label = QLabel(movie_button)
+            movie_label.setPixmap(pixmap.scaled(150, 200, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation))
+
+            # Overlay for title
+            overlay = QLabel(movie_button)
+            overlay.setText(movie["title"])
+            overlay.setFont(QFont("Arial", 10, QFont.Bold))
+            overlay.setStyleSheet("color: white; background-color: rgba(0, 0, 0, 0.7); padding: 5px;")
+            overlay.setAlignment(Qt.AlignCenter)
+            overlay.setFixedHeight(30)
+            overlay.setFixedWidth(150)
+            overlay.move(0, 190)
+
+            self.movies_layout.addWidget(movie_button, i // 4, i % 4)
+
+    def show_movie_details(self, movie):
+        # Open the MovieDetailWindow with the selected movie details
+        self.movie_detail_window = MovieDetailWindow(movie, self.username)
+        self.movie_detail_window.show()
+
+    def open_add_movie_window(self):
+        self.add_movie_window = AddMovieWindow(self.username)
+        self.add_movie_window.show()
+
+
+class AddMovieWindow(QWidget):
+    def __init__(self, username):
+        super().__init__()
+        self.setWindowTitle("Добавить фильм")
+        self.setFixedSize(400, 300)
+        self.username = username
+
+        # Layout for adding movie
+        layout = QVBoxLayout()
+
+        # Movie Title
+        self.title_input = QLineEdit(self)
+        self.title_input.setPlaceholderText("Название фильма")
+        layout.addWidget(self.title_input)
+
+        # Upload image button
+        self.upload_button = QPushButton("Загрузить изображение")
+        self.upload_button.clicked.connect(self.upload_image)
+        layout.addWidget(self.upload_button)
+
+        # Add movie button
+        self.add_button = QPushButton("Добавить фильм")
+        self.add_button.clicked.connect(self.add_movie)
+        layout.addWidget(self.add_button)
+
+        self.setLayout(layout)
+
+    def add_movie(self):
+        # Send movie data and image path to the Flask API
+        movie_title = self.title_input.text()
+        if movie_title and hasattr(self, "image_path"):
+            # Send movie data to the Flask API
+            self.upload_movie_to_api(movie_title)
+        else:
+            QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните все поля")
+
+    def upload_image(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите изображение", "", "Images (*.png *.jpg *.bmp)")
+        if file_name:
+            self.image_path = file_name
+
+        bg_file_name, _ = QFileDialog.getOpenFileName(self, "Выберите фоновое изображение", "", "Images (*.png *.jpg *.bmp)")
+        if bg_file_name:
+            self.background_image_path = bg_file_name
+
+    def upload_movie_to_api(self, movie_title):
+        with open(self.image_path, 'rb') as img_file:
+            image_data = {'file': img_file}
+            img_response = requests.post(f"{API_URL}/upload_image", files=image_data)
+
+        with open(self.background_image_path, 'rb') as bg_file:
+            bg_data = {'file': bg_file}
+            bg_response = requests.post(f"{API_URL}/upload_image", files=bg_data)
+
+        if img_response.status_code == 200 and bg_response.status_code == 200:
+            movie_data = {
+                "title": movie_title,
+                "image": img_response.json()["url"],
+                "background": bg_response.json()["url"]
+            }
+            response = requests.post(f"{API_URL}/add_movie", json=movie_data)
+            if response.status_code == 200:
+                QMessageBox.information(self, "Успех", "Фильм успешно добавлен")
+                self.close()
+            else:
+                QMessageBox.warning(self, "Ошибка", "Не удалось добавить фильм")
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не удалось загрузить изображение")
+
 
