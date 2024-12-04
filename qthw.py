@@ -7,10 +7,11 @@ import sys
 
 
 class MovieDetailWindow(QWidget):
-    def __init__(self, movie_info):
+    def __init__(self, movie_info, username):
         super().__init__()
         self.setWindowTitle(movie_info["title"])
         self.setFixedSize(800, 600)
+        self.username = username
 
         # Manually set the background image based on the movie title
         backgrounds = {
@@ -67,6 +68,7 @@ class MovieDetailWindow(QWidget):
                 "background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;"
             )
             container_layout.addWidget(time_button, alignment=Qt.AlignCenter)
+            time_button.clicked.connect(lambda _, t=time: self.book_open(movie_info["title"], t, self.username))
 
         # Back button
         back_button = QPushButton("назад")
@@ -81,7 +83,11 @@ class MovieDetailWindow(QWidget):
         main_layout.addWidget(content_container)
 
         self.setLayout(main_layout)
-
+        
+    def book_open(self, movie_title, movie_time, username):
+        from book import SeatSelectionWindow
+        b = SeatSelectionWindow(movie_title, movie_time, username)
+        b.show()
 
 
 class MovieWindow(QWidget):
@@ -151,7 +157,7 @@ class MovieWindow(QWidget):
             movie_button = QPushButton()
             movie_button.setFixedSize(150, 220)
             movie_button.setStyleSheet("border: none; background-color: black;")
-            movie_button.clicked.connect(lambda checked, m=movie: self.open_movie_detail(m))
+            movie_button.clicked.connect(lambda checked, m=movie: self.open_movie_detail(m,self.username))
 
             # Add poster
             pixmap = QPixmap(movie["image"]).scaled(150, 200, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
@@ -183,7 +189,7 @@ class MovieWindow(QWidget):
 
         self.setLayout(main_layout)
 
-    def open_movie_detail(self, movie):
-        self.detail_window = MovieDetailWindow(movie)
+    def open_movie_detail(self, movie, username):
+        self.detail_window = MovieDetailWindow(movie, username)
         self.detail_window.show()
 
