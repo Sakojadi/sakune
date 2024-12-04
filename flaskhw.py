@@ -4,22 +4,7 @@ app = Flask(__name__)
 
 # In-memory data storage
 users = {}  # {"username": "password"}
-movies = [
-    {
-        "id": 1,
-        "title": "Inception",
-        "poster_url": "https://m.media-amazon.com/images/M/MV5BZDUxNThhYTUtYjgxNy00MGQ4LTgzOTEtZjg1YTU5NTcwNThlXkEyXkFqcGc@._V1_.jpg",  # Replace with actual URL
-        "times": ["12:00", "15:00", "18:00"],
-        "tickets": {}  # {"12:00": {"seats": [(0, 1), (1, 2)], "buyers": ["user1", "user2"]}}
-    },
-    {
-        "id": 2,
-        "title": "Interstellar",
-        "poster_url": "https://m.media-amazon.com/images/M/MV5BZDUxNThhYTUtYjgxNy00MGQ4LTgzOTEtZjg1YTU5NTcwNThlXkEyXkFqcGc@._V1_.jpg",
-        "times": ["10:00", "14:00", "20:00"],
-        "tickets": {}
-    },
-]
+movies = []
 
 @app.route("/")
 def home():

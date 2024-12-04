@@ -7,7 +7,7 @@ import sys
 import requests
 
 
-API_URL = "http://127.0.0.1:5000"  # Update this if Flask runs on a different host/port
+API_URL = "https://sakojadi.pythonanywhere.com"  # Update this if Flask runs on a different host/port
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -123,7 +123,7 @@ class LoginWindow(QWidget):
 
     def open_movie_window(self, username):
         from qthw import MovieWindow
-        self.movie_window = MovieWindow()  # Pass the username
+        self.movie_window = MovieWindow(username)  # Pass the username
         self.close()  # Close the login window
         self.movie_window.show()  # Show the movie window
 
