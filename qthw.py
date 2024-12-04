@@ -63,14 +63,19 @@ class MovieDetailWindow(QWidget):
         back_button = QPushButton("назад")
         back_button.setFixedSize(100, 40)
         back_button.setStyleSheet("background-color: #A72323; color: white; font-size: 14px; border-radius: 10px; border: none;")
-        back_button.clicked.connect(self.close)
+        back_button.clicked.connect(self.back_to)
         container_layout.addWidget(back_button, alignment=Qt.AlignCenter)
 
         content_container.setLayout(container_layout)
         main_layout.addWidget(content_container)
 
         self.setLayout(main_layout)
-
+        
+    def back_to(self, username):
+        win = MovieWindow(self.username)
+        win.show()
+        self.close()
+        
     def book_open(self, movie_title, movie_time, username, m_id):
         from book import SeatSelectionWindow
         self.seat_selection_window = SeatSelectionWindow(movie_title, movie_time, username, m_id)
@@ -170,7 +175,7 @@ class MovieWindow(QWidget):
             overlay = QLabel(movie_button)
             overlay.setText(movie["title"])
             overlay.setFont(QFont("Arial", 10, QFont.Bold))
-            overlay.setStyleSheet("color: white; background-color: rgba(0, 0, 0, 0.7); padding: 5px;")
+            overlay.setStyleSheet("color: white; background-color: rgba(21, 8, 142, 0.7); padding: 5px;")
             overlay.setAlignment(Qt.AlignCenter)
             overlay.setFixedHeight(30)
             overlay.setFixedWidth(150)
@@ -182,11 +187,12 @@ class MovieWindow(QWidget):
         # Open the MovieDetailWindow with the selected movie details
         self.movie_detail_window = MovieDetailWindow(movie, self.username)
         self.movie_detail_window.show()
+        self.close()
 
     def open_add_movie_window(self):
         self.add_movie_window = AddMovieWindow()
         self.add_movie_window.new_movie_added.connect(self.add_movie_to_list)
-        self.add_movie_window.show()
+        self.add_movie_window.exec()
 
     def add_movie_to_list(self, movie_data):
         self.movie_data.append(movie_data)
@@ -198,6 +204,7 @@ class AddMovieWindow(QDialog):
         super().__init__()
         self.setWindowTitle("Добавить фильм")
         self.setFixedSize(400, 300)
+        self.setStyleSheet("background-color: #232527;")
 
         # Layout for adding movie
         layout = QVBoxLayout()
@@ -205,22 +212,40 @@ class AddMovieWindow(QDialog):
         # Movie Title
         self.title_input = QLineEdit(self)
         self.title_input.setPlaceholderText("Название фильма")
+        self.title_input.setFixedSize(295, 40)
+        self.title_input.setStyleSheet(
+            "background-color: #FFFFFF; color: black; font-size: 16px; border: none; border-radius: 5px; padding-left: 10px;"
+        )
         layout.addWidget(self.title_input)
 
         # Upload image button
         self.upload_button = QPushButton("Загрузить изображение")
         self.upload_button.clicked.connect(self.upload_image)
+        self.upload_button.setFixedSize(295, 40)
+        self.upload_button.setStyleSheet(
+            "background-color: #2323A7; color: white; font-size: 16px; border: none; border-radius: 5px;"
+        )
         layout.addWidget(self.upload_button)
         
-        self.background_button = QPushButton("Загрузить фоновое ищоброжение")
+        self.background_button = QPushButton("Загрузить фоновое изоброжение")
         self.background_button.clicked.connect(self.upload_background)
+        self.background_button.setFixedSize(295, 40)
+        self.background_button.setStyleSheet(
+            "background-color: #2323A7; color: white; font-size: 16px; border: none; border-radius: 5px;"
+        )
         layout.addWidget(self.background_button)
 
         # Add movie button
         self.add_button = QPushButton("Добавить фильм")
         self.add_button.clicked.connect(self.add_movie)
+        self.add_button.setFixedSize(295, 40)
+        self.add_button.setStyleSheet(
+            "background-color: #2323A7; color: white; font-size: 16px; border: none; border-radius: 5px;"
+        )
         layout.addWidget(self.add_button)
-
+        
+        
+        layout.setAlignment(Qt.AlignCenter)
         self.setLayout(layout)
 
     def add_movie(self):

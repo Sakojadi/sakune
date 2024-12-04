@@ -67,6 +67,13 @@ class SignUpWindow(QWidget):
         self.register_button.setStyleSheet(
             "background-color: #34609D; color: white; font-size: 16px; border: none; border-radius: 5px;"
         )
+        
+        self.back_button = QPushButton("Back", self)
+        self.back_button.setFixedSize(295, 40)
+        self.back_button.setStyleSheet(
+            "background-color: #A72323; color: white; font-size: 16px; border: none; border-radius: 5px;"
+        )
+
 
         # Компоновка элементов внутри контейнера
         form_layout = QVBoxLayout(self.form_container)
@@ -79,6 +86,7 @@ class SignUpWindow(QWidget):
         form_layout.addWidget(self.input_confirm)
         form_layout.addWidget(self.confirm_password_input)
         form_layout.addWidget(self.register_button)
+        form_layout.addWidget(self.back_button)
 
         # Основной компоновщик для центрирования формы
         layout = QVBoxLayout(self)
@@ -88,6 +96,7 @@ class SignUpWindow(QWidget):
 
         # Register button click signal connection (only once)
         self.register_button.clicked.connect(self.register_user)
+        self.back_button.clicked.connect(self.back_to)
         
     def back_to(self):
         from login import LoginWindow

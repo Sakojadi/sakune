@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox
+    QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox, QFileDialog
 )
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
@@ -48,7 +48,7 @@ class LoginWindow(QWidget):
         self.username_input = QLineEdit(self.form_container)
         self.username_input.setPlaceholderText("Don't write your name")
         self.username_input.setFixedSize(295, 40)
-        self.username_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF")
+        self.username_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF; padding-left: 10px;")
         
         self.input_pass = QLabel("password",self)
         self.input_pass.setStyleSheet("color: white;")
@@ -58,7 +58,7 @@ class LoginWindow(QWidget):
         self.password_input.setPlaceholderText("make a strong one")
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setFixedSize(295, 40)
-        self.password_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF")
+        self.password_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF; padding-left: 10px;")
 
         # Кнопка входа
         self.login_button = QPushButton("LOGIN", self.form_container)
