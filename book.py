@@ -9,26 +9,40 @@ from PyQt5.QtWidgets import (
     QWidget,
     QHBoxLayout
 )
-from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
 import requests
 
 API_URL = "https://sakojadi.pythonanywhere.com"
 
 class SeatSelectionWindow(QMainWindow):
-    def __init__(self, movie_title, movie_time, username, bought_seats=None):
+    def __init__(self, movie_title, movie_time, username, m_id):
         super().__init__()
         self.movie_title = movie_title
         self.movie_time = movie_time
         self.username = username
         self.selected_seats = []
-        self.bought_seats = bought_seats or []  # List of already booked seats [(row, col), ...]
+        self.movie_id = m_id
+        self.bought_seats = self.fetch_booked_seats()  # Fetch booked seats dynamically
 
         self.setWindowTitle(f"{self.movie_title} - {self.movie_time}")
         self.setGeometry(100, 100, 800, 600)
         self.setStyleSheet("background-color: #1e1e1e;")  # Dark background for the window
 
         self.initUI()
+
+    def fetch_booked_seats(self):
+        """Fetch booked seats from the API."""
+        try:
+            response = requests.get(
+                f"{API_URL}/get_booked_seats",
+                params={"movie_id": self.movie_id, "time": self.movie_time}
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("booked_seats", [])
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to fetch booked seats: {e}")
+            return []  # Return an empty list if the request fails
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -57,10 +71,11 @@ class SeatSelectionWindow(QMainWindow):
             for col in range(cols):
                 btn = QPushButton()
                 btn.setFixedSize(40, 40)
-                btn.setStyleSheet("background-color: lightblue; border-radius: 5px;")  # Light blue for available seats
-                if (row, col) in self.bought_seats:
-                    btn.setStyleSheet("background-color: blue; border-radius: 5px;")  # Blue for bought seats
+                if [row, col] in self.bought_seats:
+                    btn.setStyleSheet("background-color: blue; border-radius: 5px;")  # Booked seats
                     btn.setEnabled(False)
+                else:
+                    btn.setStyleSheet("background-color: lightblue; border-radius: 5px;")  # Available seats
                 btn.clicked.connect(lambda _, r=row, c=col: self.toggle_seat(r, c))
                 self.grid_layout.addWidget(btn, row, col)
 
@@ -104,22 +119,16 @@ class SeatSelectionWindow(QMainWindow):
                 f"{API_URL}/book",
                 json={
                     "username": self.username,
-                    "movie_id": 1,  # Adjust this ID as needed
+                    "movie_id": self.movie_id,
                     "time": self.movie_time,
                     "seats": self.selected_seats,
                 },
             )
             response.raise_for_status()
 
-            try:
-                data = response.json()
-            except requests.exceptions.JSONDecodeError:
-                print(f"Failed to parse JSON: {response.text}")
-                return
-
+            data = response.json()
             if response.status_code == 200:
                 print(data.get("message", "Tickets booked successfully."))
-                # Mark seats as booked in UI
                 for seat in self.selected_seats:
                     btn = self.grid_layout.itemAtPosition(*seat).widget()
                     btn.setStyleSheet("background-color: blue; border-radius: 5px;")
@@ -133,4 +142,3 @@ class SeatSelectionWindow(QMainWindow):
 
     def go_back(self):
         self.close()
-

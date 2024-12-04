@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea, QGridLayout, QHBoxLayout, QMessageBox, QLineEdit, QFileDialog
+    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea, QGridLayout, QHBoxLayout, QMessageBox, QLineEdit, QFileDialog, QDialog
 )
 from PyQt5.QtGui import QPixmap, QFont, QPalette, QBrush
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 import sys
 import requests
 
@@ -57,7 +57,7 @@ class MovieDetailWindow(QWidget):
             time_button.setFixedSize(100, 40)
             time_button.setStyleSheet("background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;")
             container_layout.addWidget(time_button, alignment=Qt.AlignCenter)
-            time_button.clicked.connect(lambda _, t=time: self.book_open(movie_info["title"], t, self.username))
+            time_button.clicked.connect(lambda _, t=time: self.book_open(movie_info["title"], t, self.username, movie_info['id']))
 
         # Back Button
         back_button = QPushButton("назад")
@@ -71,9 +71,9 @@ class MovieDetailWindow(QWidget):
 
         self.setLayout(main_layout)
 
-    def book_open(self, movie_title, movie_time, username):
+    def book_open(self, movie_title, movie_time, username, m_id):
         from book import SeatSelectionWindow
-        self.seat_selection_window = SeatSelectionWindow(movie_title, movie_time, username)
+        self.seat_selection_window = SeatSelectionWindow(movie_title, movie_time, username, m_id)
         self.seat_selection_window.show()
 
 
@@ -102,7 +102,7 @@ class MovieWindow(QWidget):
 
         # Spacer
         header_layout.addStretch()
-
+        
         # Add button
         add_button = QPushButton("добавить")
         add_button.setFixedSize(100, 40)
@@ -184,16 +184,20 @@ class MovieWindow(QWidget):
         self.movie_detail_window.show()
 
     def open_add_movie_window(self):
-        self.add_movie_window = AddMovieWindow(self.username)
+        self.add_movie_window = AddMovieWindow()
+        self.add_movie_window.new_movie_added.connect(self.add_movie_to_list)
         self.add_movie_window.show()
 
+    def add_movie_to_list(self, movie_data):
+        self.movie_data.append(movie_data)
+        self.update_movie_list()
 
-class AddMovieWindow(QWidget):
-    def __init__(self, username):
+class AddMovieWindow(QDialog):
+    new_movie_added = pyqtSignal(dict)
+    def __init__(self):
         super().__init__()
         self.setWindowTitle("Добавить фильм")
         self.setFixedSize(400, 300)
-        self.username = username
 
         # Layout for adding movie
         layout = QVBoxLayout()
@@ -207,6 +211,10 @@ class AddMovieWindow(QWidget):
         self.upload_button = QPushButton("Загрузить изображение")
         self.upload_button.clicked.connect(self.upload_image)
         layout.addWidget(self.upload_button)
+        
+        self.background_button = QPushButton("Загрузить фоновое ищоброжение")
+        self.background_button.clicked.connect(self.upload_background)
+        layout.addWidget(self.background_button)
 
         # Add movie button
         self.add_button = QPushButton("Добавить фильм")
@@ -228,7 +236,8 @@ class AddMovieWindow(QWidget):
         file_name, _ = QFileDialog.getOpenFileName(self, "Выберите изображение", "", "Images (*.png *.jpg *.bmp)")
         if file_name:
             self.image_path = file_name
-
+    
+    def upload_background(self):
         bg_file_name, _ = QFileDialog.getOpenFileName(self, "Выберите фоновое изображение", "", "Images (*.png *.jpg *.bmp)")
         if bg_file_name:
             self.background_image_path = bg_file_name
@@ -251,6 +260,7 @@ class AddMovieWindow(QWidget):
             response = requests.post(f"{API_URL}/add_movie", json=movie_data)
             if response.status_code == 200:
                 QMessageBox.information(self, "Успех", "Фильм успешно добавлен")
+                self.new_movie_added.emit(movie_data)
                 self.close()
             else:
                 QMessageBox.warning(self, "Ошибка", "Не удалось добавить фильм")

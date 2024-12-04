@@ -40,7 +40,7 @@ def login():
     
     return jsonify({"message": "Login successful"}), 200
 
-# Get movies list
+# # Get movies list
 @app.route("/movies", methods=["GET"])
 def get_movies():
     return jsonify({"movies": movies}), 200
@@ -131,6 +131,21 @@ def add_movie():
     movies.append(new_movie)
 
     return jsonify({"message": "Movie added successfully"}), 200
+
+@app.route("/get_booked_seats", methods=["GET"])
+def get_booked_seats():
+    movie_id = int(request.args.get("movie_id"))
+    time = request.args.get("time")
+
+    movie = next((m for m in movies if m["id"] == movie_id), None)
+    if not movie:
+        return jsonify({"error": "Movie not found"}), 404
+
+    if time not in movie["tickets"]:
+        return jsonify({"booked_seats": []}), 200
+
+    booked_seats = movie["tickets"][time]["seats"]
+    return jsonify({"booked_seats": booked_seats}), 200
 
 
 if __name__ == "__main__":
