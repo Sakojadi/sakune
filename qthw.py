@@ -5,6 +5,7 @@ from PyQt5.QtGui import QPixmap, QFont, QPalette, QBrush
 from PyQt5.QtCore import Qt, pyqtSignal
 import sys
 import requests
+from profil import PersonalCabinet
 
 
 API_URL = "https://sakojadi.pythonanywhere.com"
@@ -52,6 +53,7 @@ class MovieDetailWindow(QWidget):
         container_layout.addWidget(title_label)
 
         # Dynamic Showtimes
+        print(movie_info)
         for time in movie_info["times"]:
             time_button = QPushButton(time)
             time_button.setFixedSize(100, 40)
@@ -82,6 +84,7 @@ class MovieDetailWindow(QWidget):
         self.seat_selection_window.show()
 
 
+
 class MovieWindow(QWidget):
     def __init__(self, username):
         super().__init__()
@@ -98,18 +101,29 @@ class MovieWindow(QWidget):
         # Header layout (title and add button)
         header_layout = QHBoxLayout()
         header_layout.setAlignment(Qt.AlignTop)
+        # Profile button
+        profile_button = QPushButton("profile")
+        profile_button.setFixedSize(100, 40)
+        profile_button.setStyleSheet(
+            "background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;"
+        )
+        profile_button.clicked.connect(self.open_profile_window)
+        header_layout.addWidget(profile_button)
+
 
         # Title
         title_label = QLabel("MOVIES")
         title_label.setFont(QFont("Arial", 36, QFont.Bold))
-        title_label.setStyleSheet("color: white;")
+        title_label.setStyleSheet("color: white; text-align:center")
         header_layout.addWidget(title_label)
+        header_layout.setAlignment(title_label, Qt.AlignCenter)
+
 
         # Spacer
         header_layout.addStretch()
         
         # Add button
-        add_button = QPushButton("добавить")
+        add_button = QPushButton("add")
         add_button.setFixedSize(100, 40)
         add_button.setStyleSheet(
             "background-color: #2323A7; color: white; font-size: 14px; border-radius: 10px; border: none;"
@@ -189,10 +203,19 @@ class MovieWindow(QWidget):
         self.movie_detail_window.show()
         self.close()
 
+    def open_profile_window(self):
+        self.profile_window = PersonalCabinet(self.username)
+        self.profile_window.show()
+
+
     def open_add_movie_window(self):
         self.add_movie_window = AddMovieWindow()
         self.add_movie_window.new_movie_added.connect(self.add_movie_to_list)
         self.add_movie_window.exec()
+
+    def add_movie_to_list(self, movie_data):
+        self.movie_data.append(movie_data)
+        self.update_movie_list()
 
     def add_movie_to_list(self, movie_data):
         self.movie_data.append(movie_data)
@@ -291,5 +314,3 @@ class AddMovieWindow(QDialog):
                 QMessageBox.warning(self, "Ошибка", "Не удалось добавить фильм")
         else:
             QMessageBox.warning(self, "Ошибка", "Не удалось загрузить изображение")
-
-

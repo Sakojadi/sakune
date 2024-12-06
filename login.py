@@ -38,7 +38,7 @@ class LoginWindow(QWidget):
         # Container for the form (with black background and size 400x470)
         self.form_container = QWidget(self)
         self.form_container.setFixedSize(400, 340)
-        self.form_container.setStyleSheet("background-color: #232527; border-radius: 10px;")
+        self.form_container.setStyleSheet("background-color: rgba(16, 31, 52, 0.88); border-radius: 10px;")
 
         # Поля ввода
         self.input = QLabel("username",self)
@@ -62,9 +62,9 @@ class LoginWindow(QWidget):
 
         # Кнопка входа
         self.login_button = QPushButton("LOGIN", self.form_container)
-        self.login_button.setFixedSize(295, 40)
+        self.login_button.setFixedSize(295, 35)
         self.login_button.setStyleSheet(
-            "background-color: #34609D; color: white; font-size: 16px; border: none; border-radius: 5px;"
+            "background-color: #1C3AA9; color: white; font-size: 16px; border: none; border-radius: 5px;"
         )
 
         # Чекбокс reCAPTCHA

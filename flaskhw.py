@@ -148,6 +148,19 @@ def get_booked_seats():
     return jsonify({"booked_seats": booked_seats}), 200
 
 
+@app.route("/delete_movie/<int:movie_id>", methods=["DELETE"])
+def delete_movie(movie_id):
+    # Поиск фильма по ID
+    movie = next((movie for movie in movies if movie["id"] == movie_id), None)
+
+    if movie is None:
+        return jsonify({"error": "Movie not found"}), 404
+
+    # Удаление фильма из списка
+    movies.remove(movie)
+
+    return jsonify({"message": "Movie deleted successfully", "movie": movie}), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
     
