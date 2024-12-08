@@ -68,7 +68,6 @@ class LoginWindow(QWidget):
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setFixedSize(295, 40)
-        # self.password_input.setStyleSheet("border-radius: 10px; background-color: #FFFFFF; padding-left: 10px;")
         self.password_input.setStyleSheet("""
     QLineEdit {
         border: 2px solid #FFFFFF; /* Цвет рамки */

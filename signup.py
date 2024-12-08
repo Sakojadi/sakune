@@ -34,16 +34,13 @@ class SignUpWindow(QWidget):
         
         self.form_container = QWidget(self)
         self.form_container.setFixedSize(400, 340)
-        self.form_container.setStyleSheet("background-color: rgba(16, 31, 52, 0.88); border-radius: 10px;")
+        self.form_container.setStyleSheet("background-color: rgba(16, 31, 52, 0.88); border-radius: 15px;")
 
         self.sign_label = QLabel("SIGN UP", self.form_container)
         self.sign_label.setFont(QFont("RocknRoll One", 32))
         self.sign_label.setStyleSheet("color: white;")
         self.sign_label.setAlignment(Qt.AlignCenter)
         
-        # self.input = QLabel("username",self)
-        # self.input.setStyleSheet("color: white;")
-        # self.input.setFont(QFont("RocknRoll One", 8))
         
         self.username_input = QLineEdit(self)
         self.username_input.setPlaceholderText("Username")
@@ -59,9 +56,7 @@ class SignUpWindow(QWidget):
     }
 """)
         
-        # self.input_password = QLabel("password",self)
-        # self.input_password.setStyleSheet("color: white;")
-        # self.input_password.setFont(QFont("RocknRoll One", 8))
+       
         
         self.password_input = QLineEdit(self)
         self.password_input.setPlaceholderText("Password")
@@ -78,9 +73,7 @@ class SignUpWindow(QWidget):
 """)
         self.password_input.setEchoMode(QLineEdit.Password)
         
-        # self.input_confirm = QLabel("confirm password",self)
-        # self.input_confirm.setStyleSheet("color: white;")
-        # self.input_confirm.setFont(QFont("RocknRoll One", 8))
+       
         
         self.confirm_password_input = QLineEdit(self)
         self.confirm_password_input.setPlaceholderText("Confirm password")
