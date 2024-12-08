@@ -34,56 +34,93 @@ class SignUpWindow(QWidget):
         
         self.form_container = QWidget(self)
         self.form_container.setFixedSize(400, 340)
-        self.form_container.setStyleSheet("background-color: #232527; border-radius: 10px;")
+        self.form_container.setStyleSheet("background-color: rgba(16, 31, 52, 0.88); border-radius: 10px;")
+
+        self.sign_label = QLabel("SIGN UP", self.form_container)
+        self.sign_label.setFont(QFont("RocknRoll One", 32))
+        self.sign_label.setStyleSheet("color: white;")
+        self.sign_label.setAlignment(Qt.AlignCenter)
         
-        self.input = QLabel("username",self)
-        self.input.setStyleSheet("color: white;")
-        self.input.setFont(QFont("RocknRoll One", 8))
+        # self.input = QLabel("username",self)
+        # self.input.setStyleSheet("color: white;")
+        # self.input.setFont(QFont("RocknRoll One", 8))
         
         self.username_input = QLineEdit(self)
+        self.username_input.setPlaceholderText("Username")
         self.username_input.setFixedSize(295, 40)
-        self.username_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF")
+        self.username_input.setStyleSheet("""
+    QLineEdit {
+        border: 2px solid #FFFFFF; /* Цвет рамки */
+        border-radius: 15px;      /* Радиус закругления */
+        background-color: #101F34; /* Цвет фона */
+        color: white;
+        padding-left: 10px;       /* Отступ текста от края */
+        height: 40px;             /* Высота поля */
+    }
+""")
         
-        self.input_password = QLabel("password",self)
-        self.input_password.setStyleSheet("color: white;")
-        self.input_password.setFont(QFont("RocknRoll One", 8))
+        # self.input_password = QLabel("password",self)
+        # self.input_password.setStyleSheet("color: white;")
+        # self.input_password.setFont(QFont("RocknRoll One", 8))
         
         self.password_input = QLineEdit(self)
+        self.password_input.setPlaceholderText("Password")
         self.password_input.setFixedSize(295, 40)
-        self.password_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF")
+        self.password_input.setStyleSheet("""
+    QLineEdit {
+        border: 2px solid #FFFFFF; /* Цвет рамки */
+        border-radius: 15px;      /* Радиус закругления */
+        background-color: #101F34; /* Цвет фона */
+        color: white;
+        padding-left: 10px;       /* Отступ текста от края */
+        height: 40px;             /* Высота поля */
+    }
+""")
         self.password_input.setEchoMode(QLineEdit.Password)
         
-        self.input_confirm = QLabel("confirm password",self)
-        self.input_confirm.setStyleSheet("color: white;")
-        self.input_confirm.setFont(QFont("RocknRoll One", 8))
+        # self.input_confirm = QLabel("confirm password",self)
+        # self.input_confirm.setStyleSheet("color: white;")
+        # self.input_confirm.setFont(QFont("RocknRoll One", 8))
         
         self.confirm_password_input = QLineEdit(self)
+        self.confirm_password_input.setPlaceholderText("Confirm password")
         self.confirm_password_input.setFixedSize(295, 40)
-        self.confirm_password_input.setStyleSheet("border-radius: 5px; background-color: #FFFFFF")
+        self.confirm_password_input.setStyleSheet("""
+    QLineEdit {
+        border: 2px solid #FFFFFF; /* Цвет рамки */
+        border-radius: 15px;      /* Радиус закругления */
+        background-color: #101F34; /* Цвет фона */
+        color: white;
+        padding-left: 10px;       /* Отступ текста от края */
+        height: 40px;             /* Высота поля */
+    }
+""")
         self.confirm_password_input.setEchoMode(QLineEdit.Password)
 
         self.register_button = QPushButton("Register", self)
-        self.register_button.setFixedSize(295, 40)
+        self.register_button.setFixedSize(295, 30)
         self.register_button.setStyleSheet(
-            "background-color: #34609D; color: white; font-size: 16px; border: none; border-radius: 5px;"
+            "background-color: #1C3AA9; color: white; font-size: 16px; border: none; border-radius: 5px;"
         )
         
         self.back_button = QPushButton("Back", self)
-        self.back_button.setFixedSize(295, 40)
+        self.back_button.setFixedSize(295, 30)
         self.back_button.setStyleSheet(
-            "background-color: #A72323; color: white; font-size: 16px; border: none; border-radius: 5px;"
+            "background-color: #B27272; color: white; font-size: 16px; border: none; border-radius: 5px;"
         )
 
 
         # Компоновка элементов внутри контейнера
         form_layout = QVBoxLayout(self.form_container)
         form_layout.setAlignment(Qt.AlignCenter)
+        form_layout.setSpacing(15)
+        form_layout.addWidget(self.sign_label)
         form_layout.addWidget(self.title_label)
-        form_layout.addWidget(self.input)
+        # form_layout.addWidget(self.input)
         form_layout.addWidget(self.username_input)
-        form_layout.addWidget(self.input_password)
+        # form_layout.addWidget(self.input_password)
         form_layout.addWidget(self.password_input)
-        form_layout.addWidget(self.input_confirm)
+        # form_layout.addWidget(self.input_confirm)
         form_layout.addWidget(self.confirm_password_input)
         form_layout.addWidget(self.register_button)
         form_layout.addWidget(self.back_button)

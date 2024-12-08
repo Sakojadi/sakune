@@ -137,14 +137,10 @@ class MovieWindow(QWidget):
     def open_add_movie_window(self):
         from addmovie import AddMovieWindow
         self.add_movie_window = AddMovieWindow()
-        self.add_movie_window.new_movie_added.connect(self.add_movie_to_list)
+        self.add_movie_window.new_movie_added.connect(self.fetch_movies)
         self.add_movie_window.exec()
 
-    def add_movie_to_list(self, movie_data):
-        self.movie_data.append(movie_data)
-        self.update_movie_list()
-
-    def add_movie_to_list(self, movie_data):
-        self.movie_data.append(movie_data)
-        self.update_movie_list()
+    # def add_movie_to_list(self, movie):
+    #     self.movie_data.append(movie)
+    #     self.update_movie_list()
 

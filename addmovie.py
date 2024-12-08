@@ -10,7 +10,7 @@ from qthw import MovieWindow
 API_URL = "https://sakojadi.pythonanywhere.com"
 
 class AddMovieWindow(QDialog):
-    new_movie_added = pyqtSignal(dict)
+    new_movie_added = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Добавить фильм")
@@ -91,12 +91,14 @@ class AddMovieWindow(QDialog):
             movie_data = {
                 "title": movie_title,
                 "image": img_response.json()["url"],
-                "background": bg_response.json()["url"]
+                "background": bg_response.json()["url"],
             }
+
+            # Отправляем данные фильма в API
             response = requests.post(f"{API_URL}/add_movie", json=movie_data)
+
             if response.status_code == 200:
-                QMessageBox.information(self, "Успех", "Фильм успешно добавлен")
-                self.new_movie_added.emit(movie_data)
+                self.new_movie_added.emit()  # Отправляем весь объект фильма
                 self.close()
             else:
                 QMessageBox.warning(self, "Ошибка", "Не удалось добавить фильм")
