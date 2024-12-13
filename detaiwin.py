@@ -159,19 +159,23 @@ class MovieDetailWindow(QWidget):
         self.about_overlay.setGeometry(0, 0, 800, 600)  # Position overlay relative to scrollable area
         self.about_overlay.hide()  # Initially hidden
 
-        about_text = QLabel("About this movie:\nThis is some placeholder text describing the movie.", self.about_overlay)
-        about_text.setFont(QFont("Arial", 16))
-        about_text.setStyleSheet("color: black; background-color: transparent;")
-        about_text.setAlignment(Qt.AlignCenter)
-        about_text.setGeometry(150, 200, 500, 200)
+        self.about_text = QLabel(self.about_overlay)  # Use instance variable for dynamic updates
+        self.about_text.setFont(QFont("Arial", 16))
+        self.about_text.setStyleSheet("color: black; background-color: transparent;")
+        self.about_text.setAlignment(Qt.AlignCenter)
+        self.about_text.setGeometry(150, 200, 500, 200)
+
+        # Save the movie description
+        self.movie_description = movie_info.get("description", "No description available.")
 
     def toggle_about(self):
         """Toggle the overlay visibility."""
         if self.about_overlay.isVisible():
             self.about_overlay.hide()  # Hide overlay if it's already visible
         else:
-            self.about_overlay.show()  # Show overlay if it's not visible
-
+            # Update text with the movie description
+            self.about_text.setText(f"About this movie:\n{self.movie_description}")
+            self.about_overlay.show() 
     def back_to(self):
         from qthw import MovieWindow
         win = MovieWindow(self.username)

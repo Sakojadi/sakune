@@ -1,80 +1,94 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QFileDialog, QPushButton
-from PyQt5.QtGui import QPixmap, QPainter, QBrush, QRegion, QBitmap
-from PyQt5.QtCore import Qt
-
-
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QFileDialog
+from PyQt5.QtGui import QPixmap, QPainter, QBrush, QPainterPath
+from PyQt5.QtCore import Qt, QRectF
+import requests
 
 class PersonalCabinet(QWidget):
     def __init__(self, username):
         super().__init__()
-
-        self.setWindowTitle("Личный кабинет")
+        self.username = username
+        self.setWindowTitle("sakune")
         self.setFixedSize(400, 450)
-        self.setStyleSheet("background-color: #2B2B2B; color: white; font-family: Arial;")
+        self.setStyleSheet("background-color: #101F34; color: white; font-family: Arial;")
+        
+        self.icon_url = f"https://sakojadi.pythonanywhere.com/get_icon/{self.username}"
+        self.upload_url = "https://sakojadi.pythonanywhere.com/upload_icon"
 
-        self.header_label = QLabel("Личный кабинет", self)
+        self.header_label = QLabel("PROFILE", self)
         self.header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.header_label.setStyleSheet("font-size: 20px; font-weight: bold;")
 
-        # Иконка пользователя
         self.icon_label = QLabel(self)
         self.icon_label.setFixedSize(100, 100)
-        self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.set_icon("iconpr.webp")  # Путь к вашей иконке
+        self.icon_label.setAlignment(Qt.AlignCenter)
+        self.icon_label.setCursor(Qt.PointingHandCursor)  # Указатель при наведении
+        self.icon_label.mousePressEvent = self.change_icon  # Привязываем клик к смене иконки
 
-        # Кнопка для изменения изображения
-        self.change_icon_button = QPushButton("Изменить картинку", self)
-        self.change_icon_button.setStyleSheet("margin-top: 10px;")
-        self.change_icon_button.clicked.connect(self.change_icon)
-
-        # Имя пользователя
         self.username_label = QLabel(username, self)
         self.username_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.username_label.setStyleSheet("font-size: 16px; margin-top: 10px;")
 
-        # Ссылки
-        self.my_movies_label = QLabel("Мои фильмы >", self)
-        self.my_movies_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.my_movies_label.setStyleSheet("font-size: 14px; margin-top: 20px; cursor: pointer;")
-
-        self.reports_label = QLabel("Отчеты по фильмам >", self)
-        self.reports_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.reports_label.setStyleSheet("font-size: 14px; margin-top: 5px; cursor: pointer;")
-
-        # Компоновка элементов
         layout = QVBoxLayout(self)
         layout.addWidget(self.header_label)
-        layout.addWidget(self.icon_label)
-        layout.addWidget(self.change_icon_button)
+        layout.addWidget(self.icon_label, alignment=Qt.AlignCenter)
         layout.addWidget(self.username_label)
-        layout.addWidget(self.my_movies_label)
-        layout.addWidget(self.reports_label)
-        layout.addStretch()  # Чтобы элементы выровнялись по верхней части
+        layout.addStretch()
         self.setLayout(layout)
 
-    def set_icon(self, image_path):
-        pixmap = QPixmap(image_path).scaled(
-            100, 100, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation
-        )
+        # Загрузка иконки
+        self.load_icon()
 
-        # Создание маски в форме круга
-        # mask = QBitmap(pixmap.size())
-        # mask.fill(Qt.GlobalColor.transparent)
+    def load_icon(self):
+        try:
+            response = requests.get(self.icon_url, stream=True)
+            if response.status_code == 200:
+                pixmap = QPixmap()
+                pixmap.loadFromData(response.content)
+                self.set_icon_pixmap(pixmap)
+            else:
+                self.set_icon_pixmap(QPixmap("iconpr.webp"))  # Установить иконку по умолчанию
+        except Exception as e:
+            print("Failed to load icon:", e)
+            self.set_icon_pixmap(QPixmap("iconpr.webp"))
 
-        # painter = QPainter(mask)
-        # painter.setBrush(Qt.GlobalColor.white)
-        # painter.drawEllipse(0, 0, pixmap.width(), pixmap.height())
-        # painter.end()
+    def set_icon_pixmap(self, pixmap):
+        """Устанавливает круглый аватар из QPixmap."""
+        rounded_pixmap = QPixmap(self.icon_label.size())
+        rounded_pixmap.fill(Qt.transparent)
 
-        # pixmap.setMask(mask)
+        painter = QPainter(rounded_pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        path = QPainterPath()
+        path.addEllipse(QRectF(0, 0, self.icon_label.width(), self.icon_label.height()))
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, pixmap.scaled(self.icon_label.size(), Qt.KeepAspectRatioByExpanding))
+        painter.end()
 
-        # Устанавливаем иконку в QLabel
-        self.icon_label.setPixmap(pixmap)
+        self.icon_label.setPixmap(rounded_pixmap)
 
-    def change_icon(self):
-        # Открываем диалог для выбора файла
+    def change_icon(self, event):
+        """Вызывает диалог для выбора нового изображения."""
         file_dialog = QFileDialog(self)
         file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.webp)")
-        if file_dialog.exec():
+        if file_dialog.exec_():
             file_path = file_dialog.selectedFiles()[0]
-            self.set_icon(file_path)
+            if file_path:
+                self.set_icon(file_path)
+                self.save_icon_to_server(file_path)
+
+    def save_icon_to_server(self, file_path):
+        """Загружает новую иконку на сервер."""
+        try:
+            with open(file_path, "rb") as file:
+                response = requests.post(self.upload_url, files={"icon": file}, data={"username": self.username})
+                if response.status_code == 200:
+                    print("Icon uploaded successfully")
+                else:
+                    print(f"Failed to upload icon: {response.text}")
+        except Exception as e:
+            print(f"Error uploading icon: {e}")
+
+    def set_icon(self, icon_path):
+        """Устанавливает иконку из локального пути."""
+        pixmap = QPixmap(icon_path)
+        self.set_icon_pixmap(pixmap)
