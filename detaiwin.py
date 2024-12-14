@@ -203,7 +203,7 @@ class MovieDetailWindow(QWidget):
             border-radius: 10px;
             border: none;
         """)
-        time_button.clicked.connect(lambda _, t=time: self.book_open(movie_info["title"], t, self.username, movie_info['id']))
+        time_button.clicked.connect(lambda _, t=time: self.book_open(self.movie_info["title"], t, self.username, self.movie_info['id']))
         self.times_layout.addWidget(time_button)
 
     def toggle_about(self):
@@ -247,3 +247,4 @@ class MovieDetailWindow(QWidget):
         """)
         time_button.clicked.connect(lambda _, t=time: self.book_open(self.movie_info["title"], t, self.username, self.movie_info['id']))
         self.times_layout.addWidget(time_button)  # Добавляем кнопку в текущий layout
+

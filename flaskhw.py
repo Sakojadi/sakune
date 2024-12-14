@@ -7,6 +7,7 @@ app = Flask(__name__)
 users = {}  # {"username": "password"}
 movies = []
 otchet = {}  # {"username": [{"movie": movie_id, "time": time, "seats": [(row, col), ...]}, ...]}
+
 @app.route("/")
 def home():
     return "Welcome to the Movie Theater API!"
@@ -40,12 +41,12 @@ def login():
     
     return jsonify({"message": "Login successful"}), 200
 
-# # Get movies list
+# Get movies list
 @app.route("/movies", methods=["GET"])
 def get_movies():
     return jsonify({"movies": movies}), 200
 
-
+# Book tickets endpoint
 @app.route("/book", methods=["POST"])
 def book_tickets():
     try:
@@ -62,15 +63,18 @@ def book_tickets():
         if not movie:
             return jsonify({"error": "Movie not found"}), 404
 
-        if time not in movie["times"]:
-            return jsonify({"error": "Invalid time"}), 400
-
         if time not in movie["tickets"]:
-            movie["tickets"][time] = {"seats": [], "buyers": []}
+            movie["tickets"][time] = {}
 
         for seat in seats:
-            if seat in movie["tickets"][time]["seats"]:
-                return jsonify({"error": f"Seat {seat} is already booked"}), 400
+            for buyer_seats in movie["tickets"][time].values():
+                if seat in buyer_seats:
+                    return jsonify({"error": f"Seat {seat} is already booked"}), 400
+
+        if username not in movie["tickets"][time]:
+            movie["tickets"][time][username] = []
+
+        movie["tickets"][time][username].extend(seats)
 
         # Store booking in otchet
         if username not in otchet:
@@ -82,14 +86,9 @@ def book_tickets():
             "seats": seats
         })
 
-        movie["tickets"][time]["seats"].extend(seats)
-        movie["tickets"][time]["buyers"].append(username)
-
         return jsonify({"message": "Tickets booked successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -117,7 +116,7 @@ def add_movie():
     image_url = data.get("image")
     times = data.get("times")
     background_url = data.get("background")
-    description = data.get("description") # Add this field
+    description = data.get("description")  # Add this field
 
     if not title or not image_url or not background_url:
         return jsonify({"error": "Movie title, image, and background are required"}), 400
@@ -129,7 +128,7 @@ def add_movie():
         "background": background_url,
         "times": times,
         "tickets": {},
-        "description":description
+        "description": description
     }
     movies.append(new_movie)
 
@@ -145,42 +144,55 @@ def get_booked_seats():
         return jsonify({"error": "Movie not found"}), 404
 
     if time not in movie["tickets"]:
-        return jsonify({"booked_seats": []}), 200
+        return jsonify({"booked_seats": {}}), 200
 
-    booked_seats = movie["tickets"][time]["seats"]
+    booked_seats = movie["tickets"][time]
     return jsonify({"booked_seats": booked_seats}), 200
 
+@app.route("/get_my_booked", methods=["GET"])
+def get_my_booked():
+    movie_id = int(request.args.get("movie_id"))
+    time = request.args.get("time")
+    buyer = request.args.get("buyers")  
+    
+    movie = next((m for m in movies if m["id"] == movie_id), None)
+    if not movie:
+        return jsonify({"user_bought": []}), 200  # Return empty list for missing movie
+
+    tickets = movie.get("tickets", {})
+    if time not in tickets or buyer not in tickets[time]:
+        return jsonify({"user_bought": []}), 200  # Handle missing data
+
+    user_bought = tickets[time][buyer]
+    return jsonify({"user_bought": user_bought}), 200
 
 @app.route("/delete_movie/<int:movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
-    # Поиск фильма по ID
     movie = next((movie for movie in movies if movie["id"] == movie_id), None)
 
     if movie is None:
         return jsonify({"error": "Movie not found"}), 404
 
-    # Удаление фильма из списка
     movies.remove(movie)
 
     return jsonify({"message": "Movie deleted successfully", "movie": movie}), 200
-
 
 ICON_FOLDER = './uploaded_icons' 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/upload_icon', methods=['POST'])
 def upload_icon():
-    username = request.form['username']  # Извлекаем имя пользователя из запроса
+    username = request.form['username']
     file = request.files['icon']
     if file:
-        file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Сохраняем файл по имени пользователя
+        file_path = os.path.join(ICON_FOLDER, f"{username}.png")
         file.save(file_path)
         return {"message": "Icon uploaded successfully"}, 200
     return {"message": "Failed to upload icon"}, 400
 
 @app.route('/get_icon/<username>', methods=['GET'])
 def get_icon(username):
-    file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Используем имя пользователя для поиска файла
+    file_path = os.path.join(ICON_FOLDER, f"{username}.png")
     if os.path.exists(file_path):
         return send_file(file_path, mimetype='image/png')
     return {"message": "Icon not found"}, 404
@@ -188,7 +200,7 @@ def get_icon(username):
 @app.route("/add_seans", methods=["POST"])
 def add_seans():
     data = request.json
-    app.logger.info(f"Received data: {data}")  # Логируем входящие данные
+    app.logger.info(f"Received data: {data}")
 
     movie_id = data.get("movie_id")
     time = data.get("time")
@@ -209,8 +221,3 @@ def add_seans():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
-    
-    
-    
-    

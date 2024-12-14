@@ -22,27 +22,44 @@ class SeatSelectionWindow(QMainWindow):
         self.username = username
         self.selected_seats = []
         self.movie_id = m_id
-        self.bought_seats = self.fetch_booked_seats()  # Fetch booked seats dynamically
+        self.bought_seats, self.user_bought = self.fetch_booked_seats()
 
         self.setWindowTitle(f"{self.movie_title} - {self.movie_time}")
         self.setGeometry(100, 100, 800, 600)
-        self.setStyleSheet("background-color: #1e1e1e;")  # Dark background for the window
+        self.setStyleSheet("background-color: #1e1e1e;")
 
         self.initUI()
 
     def fetch_booked_seats(self):
-        """Fetch booked seats from the API."""
         try:
+            # Fetch all booked seats
             response = requests.get(
                 f"{API_URL}/get_booked_seats",
                 params={"movie_id": self.movie_id, "time": self.movie_time}
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("booked_seats", [])
+
+            booked_seats = []
+            for user_seats in data.get("booked_seats", {}).values():
+                booked_seats.extend(user_seats)
+
+            # Fetch user-specific booked seats
+            res = requests.get(
+                f"{API_URL}/get_my_booked",
+                params={"movie_id": self.movie_id, "time": self.movie_time, "buyers": self.username}
+            )
+            res.raise_for_status()
+            user_data = res.json()
+            user_bought = user_data.get("user_bought", [])
+            return booked_seats, user_bought
+
         except requests.exceptions.RequestException as e:
-            print(f"Failed to fetch booked seats: {e}")
-            return []  # Return an empty list if the request fails
+            print(f"API error: {e}")
+            return [], []
+        except ValueError as e:
+            print(f"JSON error: {e}")
+            return [], []
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -71,11 +88,14 @@ class SeatSelectionWindow(QMainWindow):
             for col in range(cols):
                 btn = QPushButton()
                 btn.setFixedSize(40, 40)
-                if [row, col] in self.bought_seats:
-                    btn.setStyleSheet("background-color: blue; border-radius: 5px;")  # Booked seats
+                if [row, col] in self.user_bought:
+                    btn.setStyleSheet("background-color: red; border-radius: 5px;")
+                    btn.setEnabled(False)
+                elif [row, col] in self.bought_seats:
+                    btn.setStyleSheet("background-color: blue; border-radius: 5px;")
                     btn.setEnabled(False)
                 else:
-                    btn.setStyleSheet("background-color: lightblue; border-radius: 5px;")  # Available seats
+                    btn.setStyleSheet("background-color: lightblue; border-radius: 5px;")
                 btn.clicked.connect(lambda _, r=row, c=col: self.toggle_seat(r, c))
                 self.grid_layout.addWidget(btn, row, col)
 
@@ -84,7 +104,7 @@ class SeatSelectionWindow(QMainWindow):
         # Legend (bottom right)
         legend_layout = QVBoxLayout()
         legend_layout.addWidget(QLabel("Занято: синий"), alignment=Qt.AlignLeft)
-        legend_layout.addWidget(QLabel("Ваши места: оранжевый"), alignment=Qt.AlignLeft)
+        legend_layout.addWidget(QLabel("Ваши места: red"), alignment=Qt.AlignLeft)
 
         # Book button
         self.book_button = QPushButton("Забронировать")
@@ -131,7 +151,7 @@ class SeatSelectionWindow(QMainWindow):
                 print(data.get("message", "Tickets booked successfully."))
                 for seat in self.selected_seats:
                     btn = self.grid_layout.itemAtPosition(*seat).widget()
-                    btn.setStyleSheet("background-color: blue; border-radius: 5px;")
+                    btn.setStyleSheet("background-color: red; border-radius: 5px;")
                     btn.setEnabled(False)
                 self.selected_seats.clear()
             else:
