@@ -7,7 +7,7 @@ import sys
 import requests
 
 
-API_URL = "https://sakojadi.pythonanywhere.com"  # Update this if Flask runs on a different host/port
+API_URL = "https://sakojadi.pythonanywhere.com"
 
 class LoginWindow(QWidget):
     def __init__(self):

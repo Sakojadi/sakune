@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 import sys
 import requests
 
-API_URL = "https://sakojadi.pythonanywhere.com" 
+API_URL = "https://sakojadi.pythonanywhere.com"
 
 class SignUpWindow(QWidget):
     def __init__(self):

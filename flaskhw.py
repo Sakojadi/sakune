@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import os
 
 app = Flask(__name__)
@@ -115,7 +115,9 @@ def add_movie():
     data = request.json
     title = data.get("title")
     image_url = data.get("image")
-    background_url = data.get("background")  # Add this field
+    times = data.get("times")
+    background_url = data.get("background")
+    description = data.get("description") # Add this field
 
     if not title or not image_url or not background_url:
         return jsonify({"error": "Movie title, image, and background are required"}), 400
@@ -125,8 +127,9 @@ def add_movie():
         "title": title,
         "image": image_url,
         "background": background_url,
-        "times": ["12:00", "14:00", "16:30", "20:00"],
-        "tickets": {}
+        "times": times,
+        "tickets": {},
+        "description":description
     }
     movies.append(new_movie)
 
@@ -160,6 +163,49 @@ def delete_movie(movie_id):
     movies.remove(movie)
 
     return jsonify({"message": "Movie deleted successfully", "movie": movie}), 200
+
+
+ICON_FOLDER = './uploaded_icons' 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/upload_icon', methods=['POST'])
+def upload_icon():
+    username = request.form['username']  # Извлекаем имя пользователя из запроса
+    file = request.files['icon']
+    if file:
+        file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Сохраняем файл по имени пользователя
+        file.save(file_path)
+        return {"message": "Icon uploaded successfully"}, 200
+    return {"message": "Failed to upload icon"}, 400
+
+@app.route('/get_icon/<username>', methods=['GET'])
+def get_icon(username):
+    file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Используем имя пользователя для поиска файла
+    if os.path.exists(file_path):
+        return send_file(file_path, mimetype='image/png')
+    return {"message": "Icon not found"}, 404
+
+@app.route("/add_seans", methods=["POST"])
+def add_seans():
+    data = request.json
+    app.logger.info(f"Received data: {data}")  # Логируем входящие данные
+
+    movie_id = data.get("movie_id")
+    time = data.get("time")
+
+    if not movie_id or not time:
+        app.logger.error("Movie ID and time are required")
+        return jsonify({"error": "Movie ID and time are required"}), 400
+
+    movie = next((m for m in movies if m["id"] == movie_id), None)
+
+    if not movie:
+        app.logger.error(f"Movie with ID {movie_id} not found")
+        return jsonify({"error": "Movie not found"}), 404
+
+    movie["times"].append(time)
+    app.logger.info(f"Added time {time} to movie ID {movie_id}")
+    return jsonify({"message": "Seans added successfully"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
