@@ -165,7 +165,7 @@ def delete_movie(movie_id):
     return jsonify({"message": "Movie deleted successfully", "movie": movie}), 200
 
 
-UPLOAD_FOLDER = './uploaded_icons'
+ICON_FOLDER = './uploaded_icons' 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/upload_icon', methods=['POST'])
@@ -173,17 +173,39 @@ def upload_icon():
     username = request.form['username']  # Извлекаем имя пользователя из запроса
     file = request.files['icon']
     if file:
-        file_path = os.path.join(UPLOAD_FOLDER, f"{username}.png")  # Сохраняем файл по имени пользователя
+        file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Сохраняем файл по имени пользователя
         file.save(file_path)
         return {"message": "Icon uploaded successfully"}, 200
     return {"message": "Failed to upload icon"}, 400
 
 @app.route('/get_icon/<username>', methods=['GET'])
 def get_icon(username):
-    file_path = os.path.join(UPLOAD_FOLDER, f"{username}.png")  # Используем имя пользователя для поиска файла
+    file_path = os.path.join(ICON_FOLDER, f"{username}.png")  # Используем имя пользователя для поиска файла
     if os.path.exists(file_path):
         return send_file(file_path, mimetype='image/png')
     return {"message": "Icon not found"}, 404
+
+@app.route("/add_seans", methods=["POST"])
+def add_seans():
+    data = request.json
+    app.logger.info(f"Received data: {data}")  # Логируем входящие данные
+
+    movie_id = data.get("movie_id")
+    time = data.get("time")
+
+    if not movie_id or not time:
+        app.logger.error("Movie ID and time are required")
+        return jsonify({"error": "Movie ID and time are required"}), 400
+
+    movie = next((m for m in movies if m["id"] == movie_id), None)
+
+    if not movie:
+        app.logger.error(f"Movie with ID {movie_id} not found")
+        return jsonify({"error": "Movie not found"}), 404
+
+    movie["times"].append(time)
+    app.logger.info(f"Added time {time} to movie ID {movie_id}")
+    return jsonify({"message": "Seans added successfully"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)

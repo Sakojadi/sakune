@@ -108,10 +108,15 @@ class MovieWindow(QWidget):
 
             # Display image using URL
             pixmap = QPixmap()
-            pixmap.loadFromData(requests.get(f"{API_URL}{movie['image']}").content)
             movie_label = QLabel(movie_button)
-            movie_label.setPixmap(pixmap.scaled(150, 200, Qt.IgnoreAspectRatio, Qt.SmoothTransformation));
+            image_url = f"{API_URL}{movie['image']}"
+            image_data = requests.get(image_url).content
 
+            if pixmap.loadFromData(image_data):
+                movie_label.setPixmap(pixmap.scaled(150, 200, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+            else:
+                movie_label.setText("Ошибка загрузки изображения")
+                print(f"Не удалось загрузить изображение: {image_url}")
 
             # Overlay for title
             overlay = QLabel(movie_button)
