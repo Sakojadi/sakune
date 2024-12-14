@@ -101,11 +101,31 @@ class SeatSelectionWindow(QMainWindow):
 
         layout.addLayout(self.grid_layout)
 
-        # Legend (bottom right)
+        # Legend (bottom left)
         legend_layout = QVBoxLayout()
-        legend_layout.addWidget(QLabel("Занято: синий"), alignment=Qt.AlignLeft)
-        legend_layout.addWidget(QLabel("Ваши места: red"), alignment=Qt.AlignLeft)
+        legend_item_1 = QHBoxLayout()
+        booked_square = QLabel()
+        booked_square.setFixedSize(20, 20)
+        booked_square.setStyleSheet("background-color: blue; border-radius: 5px;")
+        booked_label = QLabel("Booked")
+        booked_label.setStyleSheet("color: white;")
+        legend_item_1.addWidget(booked_square)
+        legend_item_1.addWidget(booked_label)
 
+        legend_item_2 = QHBoxLayout()
+        your_square = QLabel()
+        your_square.setFixedSize(20, 20)
+        your_square.setStyleSheet("background-color: red; border-radius: 5px;")
+        your_label = QLabel("Your seats")
+        your_label.setStyleSheet("color: white;")
+        legend_item_2.addWidget(your_square)
+        legend_item_2.addWidget(your_label)
+
+        legend_layout.addLayout(legend_item_1)
+        legend_layout.addLayout(legend_item_2)
+
+        layout.addLayout(legend_layout)
+        
         # Book button
         self.book_button = QPushButton("Забронировать")
         self.book_button.setStyleSheet("background-color: #2a2a2a; color: white; padding: 10px;")
