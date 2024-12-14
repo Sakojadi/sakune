@@ -5,8 +5,8 @@ from PyQt5.QtGui import QPixmap, QFont, QColor
 from PyQt5.QtCore import Qt
 import requests
 
-# API_URL = "https://sakojadi.pythonanywhere.com"
-API_URL = "http://127.0.0.1:5000"
+API_URL = "https://sakojadi.pythonanywhere.com"
+# API_URL = "http://127.0.0.1:5000"
 
 class MovieDetailWindow(QWidget):
     def __init__(self, movie_info, username):
@@ -75,7 +75,7 @@ class MovieDetailWindow(QWidget):
 
         # Back Button
         back_button = QPushButton("Back")
-        back_button.setFixedSize(100, 40)
+        back_button.setFixedSize(100, 30)
         back_button.setStyleSheet("""
             background-color: #2323A7;
             color: white;
@@ -86,9 +86,10 @@ class MovieDetailWindow(QWidget):
         """)
         back_button.clicked.connect(self.back_to)
         top_buttons_layout.addWidget(back_button, alignment=Qt.AlignLeft)
+        top_buttons_layout.addSpacing(100)
 
         seans_button = QPushButton("Add seans")
-        seans_button.setFixedSize(100, 40)
+        seans_button.setFixedSize(100, 30)
         seans_button.setStyleSheet("""
             background-color: #2323A7;
             color: white;
@@ -98,11 +99,12 @@ class MovieDetailWindow(QWidget):
             border: none;
         """)
         seans_button.clicked.connect(self.open_add_seans_window)
-        top_buttons_layout.addWidget(seans_button, alignment=Qt.AlignRight)
+        top_buttons_layout.addWidget(seans_button)
+        top_buttons_layout.addSpacing(5)
 
         # About Button
         about_button = QPushButton("About")
-        about_button.setFixedSize(100, 40)
+        about_button.setFixedSize(100, 30)
         about_button.setStyleSheet("""
             background-color: #2323A7;
             color: white;
@@ -112,7 +114,7 @@ class MovieDetailWindow(QWidget):
             border: none;
         """)
         about_button.clicked.connect(self.toggle_about)
-        top_buttons_layout.addWidget(about_button, alignment=Qt.AlignRight)
+        top_buttons_layout.addWidget(about_button)
 
         sessions_layout.addLayout(top_buttons_layout)
 
@@ -126,7 +128,7 @@ class MovieDetailWindow(QWidget):
         # Dynamic Showtimes (Horizontal Layout)
         times_scroll_area = QScrollArea()
         times_scroll_area.setWidgetResizable(True)
-        times_scroll_area.setFixedHeight(120)
+        times_scroll_area.setFixedSize(600, 120)
         times_scroll_area.setStyleSheet("""
             QScrollBar:horizontal {
                 background: #2323A7;
@@ -159,8 +161,8 @@ class MovieDetailWindow(QWidget):
         scroll_layout.addWidget(sessions_container)
 
         # Price Label
-        price_label = QLabel("price :")
-        price_label.setFont(QFont("Arial", 14))
+        price_label = QLabel("price : 350")
+        price_label.setFont(QFont("Arial", 16))
         price_label.setStyleSheet("color: white; background-color: transparent;")
         price_label.setAlignment(Qt.AlignLeft)
         sessions_layout.addWidget(price_label)

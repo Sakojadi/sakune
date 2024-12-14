@@ -5,8 +5,8 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt, pyqtSignal
 import requests
 
-# API_URL = "https://sakojadi.pythonanywhere.com"
-API_URL = "http://127.0.0.1:5000"
+API_URL = "https://sakojadi.pythonanywhere.com"
+# API_URL = "http://127.0.0.1:5000"
 
 
 class AddSeansWindow(QDialog):
