@@ -12,7 +12,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 import requests
 
-API_URL = "https://sakojadi.pythonanywhere.com"
+# API_URL = "https://sakojadi.pythonanywhere.com"
+API_URL = "http://127.0.0.1:5000"
+
 
 class SeatSelectionWindow(QMainWindow):
     def __init__(self, movie_title, movie_time, username, m_id):

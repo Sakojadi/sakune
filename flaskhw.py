@@ -219,5 +219,48 @@ def add_seans():
     app.logger.info(f"Added time {time} to movie ID {movie_id}")
     return jsonify({"message": "Seans added successfully"}), 200
 
+@app.route("/movie_times/<int:movie_id>", methods=["GET"])
+def get_movie_times(movie_id):
+    """
+    Endpoint to fetch available times for a specific movie.
+    """
+    movie = next((m for m in movies if m["id"] == movie_id), None)
+    if not movie:
+        return jsonify({"error": "Movie not found"}), 404
+
+    return jsonify({"times": movie.get("times", [])}), 200
+
+
+@app.route("/get_report", methods=["GET"])
+def get_report():
+    """
+    Fetch report data: all movies, specific movie, or specific time.
+    """
+    movie_title = request.args.get("movie")
+    time = request.args.get("time")
+
+    filtered_bookings = []
+
+    for movie in movies:
+        if movie_title and movie["title"] != movie_title:
+            continue  # Skip other movies if a specific movie is selected
+
+        tickets = movie.get("tickets", {})
+        for movie_time, bookings in tickets.items():
+            if time and movie_time != time:
+                continue  # Skip other times if a specific time is selected
+
+            for username, seats in bookings.items():
+                filtered_bookings.append({
+                    "movie_title": movie["title"],
+                    "time": movie_time,
+                    "seats": seats,
+                    "username": username
+                })
+
+    return jsonify({"bookings": filtered_bookings}), 200
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

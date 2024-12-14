@@ -7,7 +7,7 @@ import sys
 import requests
 from profil import PersonalCabinet
 
-API_URL = "https://sakojadi.pythonanywhere.com"
+API_URL = "http://127.0.0.1:5000"
 
 
 class MovieWindow(QWidget):
@@ -42,8 +42,16 @@ class MovieWindow(QWidget):
         title_label.setFont(QFont("Arial", 36, QFont.Bold))
         title_label.setStyleSheet("color: white; text-align:center")
         header_layout.addWidget(title_label)
-        header_layout.addSpacing(100)
-
+        header_layout.addSpacing(50)
+        
+        #report button 
+        report_button = QPushButton("Report")
+        report_button.setFixedSize(100, 40)
+        report_button.setStyleSheet(
+            "background-color: #1C3AA9; color: white; font-size: 14px; border-radius: 10px; border: none;"
+        )
+        report_button.clicked.connect(self.open_report_window)
+        header_layout.addWidget(report_button)
         # Add button
         add_button = QPushButton("Add")
         add_button.setFixedSize(100, 40)
@@ -142,12 +150,13 @@ class MovieWindow(QWidget):
         self.profile_window.show()
 
 
-    def open_add_movie_window(self):
+    def open_add_movie_window(self): 
         from addmovie import AddMovieWindow
         self.add_movie_window = AddMovieWindow()
         self.add_movie_window.new_movie_added.connect(self.fetch_movies)
         self.add_movie_window.exec()
-
-    # def add_movie_to_list(self, movie):
-    #     self.movie_data.append(movie)
-    #     self.update_movie_list()
+    
+    def open_report_window(self):
+        from report import ReportWindow
+        self.report_window = ReportWindow()
+        self.report_window.show()

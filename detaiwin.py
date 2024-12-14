@@ -5,7 +5,8 @@ from PyQt5.QtGui import QPixmap, QFont, QColor
 from PyQt5.QtCore import Qt
 import requests
 
-API_URL = "https://sakojadi.pythonanywhere.com"
+# API_URL = "https://sakojadi.pythonanywhere.com"
+API_URL = "http://127.0.0.1:5000"
 
 class MovieDetailWindow(QWidget):
     def __init__(self, movie_info, username):
