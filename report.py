@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore  
 import requests
 
-API_URL = "http://127.0.0.1:5000"  # Use your Flask server's base URL
+API_URL = "https://sakojadi.pythonanywhere.com"
 
 class ReportWindow(QMainWindow):
     def __init__(self):
@@ -106,11 +106,16 @@ class ReportWindow(QMainWindow):
 
         # Table widget
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["Movie Title", "Time", "Seats", "Booked By"])
+        self.table.setColumnCount(5)  # Including Total Cost column
+        self.table.setHorizontalHeaderLabels(["Movie Title", "Time", "Seats", "Booked By", "Total Cost"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setStyleSheet("color: white; border: none;")
         layout.addWidget(self.table)
+
+        # Total cost label
+        self.total_cost_label = QLabel("Total Cost: 0 KZT")
+        self.total_cost_label.setStyleSheet("color: white; font-size: 16px;")
+        layout.addWidget(self.total_cost_label, alignment=Qt.AlignRight)
 
         # Container
         container = QWidget()
@@ -178,15 +183,32 @@ class ReportWindow(QMainWindow):
             response.raise_for_status()
             bookings = response.json().get("bookings", [])
 
+            # Update the table structure
             self.table.setRowCount(len(bookings))
+            total_cost = 0  # Initialize total cost
+
             for row, booking in enumerate(bookings):
-                self.table.setItem(row, 0, QTableWidgetItem(booking.get("movie_title", "-")))
-                self.table.setItem(row, 1, QTableWidgetItem(booking.get("time", "-")))
-                self.table.setItem(row, 2, QTableWidgetItem(str(booking.get("seats", []))))
-                self.table.setItem(row, 3, QTableWidgetItem(booking.get("username", "-")))
-                for col in range(4):
+                # Extracting data from the API response
+                movie = booking.get("movie_title", "-")
+                time = booking.get("time", "-")
+                seats = booking.get("seats", [])
+                username = booking.get("username", "-")
+                cost = len(seats) * 350  # Calculate the cost for current booking
+                total_cost += cost  # Add to total cost
+
+                # Fill the table
+                self.table.setItem(row, 0, QTableWidgetItem(movie))
+                self.table.setItem(row, 1, QTableWidgetItem(time))
+                self.table.setItem(row, 2, QTableWidgetItem(", ".join(map(str, seats))))
+                self.table.setItem(row, 3, QTableWidgetItem(username))
+                self.table.setItem(row, 4, QTableWidgetItem(f"{cost} KZT"))
+
+                # Align items in the center
+                for col in range(5):
                     self.table.item(row, col).setTextAlignment(Qt.AlignCenter)
+
+            # Update total cost label
+            self.total_cost_label.setText(f"Total Cost: {total_cost} KZT")
+
         except requests.exceptions.RequestException as e:
             print(f"Failed to load report data: {e}")
-
-
