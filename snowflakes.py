@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsEllipseItem
-from PyQt5.QtGui import QColor, QPen
+from PyQt5.QtGui import QColor, QPen, QRadialGradient, QBrush
 from PyQt5.QtCore import Qt, QTimer
 import random
 
@@ -13,14 +13,29 @@ class SnowflakeItem(QGraphicsEllipseItem):
         self.setPos(self.start_x, -100)
         
         # Random fall speed
-        self.fall_speed = random.uniform(50, 200)
+        self.fall_speed = random.uniform(100, 300)
         
         # Random horizontal drift
         self.drift = random.uniform(-20, 20)
         
+        # Randomly make some snowflakes glow
+        self.is_glowing = random.random() < 0.1  # 10% chance of glowing
+        
         # Set appearance
-        self.setBrush(QColor(255, 255, 255, 200))  # Semi-transparent white
-        self.setPen(QPen(Qt.NoPen))  # Corrected pen setting
+        if self.is_glowing:
+            # Much brighter and more pronounced glowing snowflake
+            self.setBrush(QColor(255, 255, 255, 250))  # Almost fully opaque bright white
+            self.glowing_pen = QPen(QColor(255, 255, 255, 250), 2.5)  # Bright white glow with thicker border
+            self.setPen(self.glowing_pen)
+            
+            # Optional: Add a radial gradient for more sparkle effect
+            gradient = QRadialGradient(size/2, size/2, size/2)
+            gradient.setColorAt(0, QColor(255, 255, 255, 255))  # Bright white center
+            gradient.setColorAt(1, QColor(255, 255, 255, 50))   # Fading to transparent
+            self.setBrush(QBrush(gradient))
+        else:
+            self.setBrush(QColor(255, 255, 255, 200))  # Semi-transparent white
+            self.setPen(QPen(Qt.NoPen))  # No border
 
 class SnowfallBackground(QGraphicsView):
     def __init__(self, parent=None):
@@ -37,12 +52,12 @@ class SnowfallBackground(QGraphicsView):
         
         # Snowflake properties
         self.snowflakes = []
-        self.num_snowflakes = 100
+        self.num_snowflakes = 150
         
         # Timer for animation
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.update_snowflakes)
-        self.animation_timer.start(50)  # Update every 50ms
+        self.animation_timer.start(10)
         
         # Resize handling
         if hasattr(self.parent(), 'resizeEvent'):
@@ -58,6 +73,7 @@ class SnowfallBackground(QGraphicsView):
         
         # Recreate snowflakes with new dimensions
         self.create_snowflakes()
+        
         
         # Call original resize event if it exists
         if hasattr(self, 'original_resize_event'):
@@ -79,8 +95,8 @@ class SnowfallBackground(QGraphicsView):
         for flake in self.snowflakes:
             # Move snowflake down
             current_pos = flake.pos()
-            new_y = current_pos.y() + flake.fall_speed / 20
-            new_x = current_pos.x() + flake.drift / 20
+            new_y = current_pos.y() + flake.fall_speed / 100
+            new_x = current_pos.x() + flake.drift / 40
             
             # Reset if snowflake goes below screen
             if new_y > self.height():
