@@ -35,7 +35,7 @@ class SignUpWindow(QWidget):
         self.title_label.setAlignment(Qt.AlignCenter)
         
         self.form_container = QWidget(self)
-        self.form_container.setFixedSize(400, 340)
+        self.form_container.setFixedSize(400, 360)
         self.form_container.setStyleSheet("background-color: rgba(16, 31, 52, 0.88); border-radius: 15px;")
 
         self.sign_label = QLabel("SIGN UP", self.form_container)

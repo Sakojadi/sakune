@@ -159,7 +159,7 @@ class SeatSelectionWindow(QMainWindow):
         # layout.addLayout(legend_layout)
         
         # Book button
-        self.book_button = QPushButton("BOOK")
+        self.book_button = QPushButton("BUY")
         self.book_button.setFixedHeight(30)
         self.book_button.setStyleSheet(
             "background-color: #1C3AA9; color: white; font-size: 10px; border: none; border-radius: 5px;"

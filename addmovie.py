@@ -15,7 +15,7 @@ class AddMovieWindow(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Add Movie")
-        self.setFixedSize(400, 480)
+        self.setFixedSize(400, 500)
         self.setStyleSheet("background-color: #101F34;")
 
         # Layout for adding movie

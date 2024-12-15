@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 
 # In-memory data storage
-users = {}  # {"username": "password"}
+users = {"adminadmin"}  # {"username": "password"}
 movies = []
 otchet = {}  # {"username": [{"movie": movie_id, "time": time, "seats": [(row, col), ...]}, ...]}
 

@@ -208,7 +208,7 @@ class ReportWindow(QMainWindow):
                     self.table.item(row, col).setTextAlignment(Qt.AlignCenter)
 
             # Update total cost label
-            self.total_cost_label.setText(f"Total Cost: {total_cost} KZT")
+            self.total_cost_label.setText(f"KASSA: {total_cost} KGZ")
 
         except requests.exceptions.RequestException as e:
             print(f"Failed to load report data: {e}")
