@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 
 # In-memory data storage
-users = {"adminadmin"}  # {"username": "password"}
+users = {"aa":"000"}  # {"username": "password"}
 movies = []
 otchet = {}  # {"username": [{"movie": movie_id, "time": time, "seats": [(row, col), ...]}, ...]}
 
@@ -173,12 +173,20 @@ def delete_movie(movie_id):
     if movie is None:
         return jsonify({"error": "Movie not found"}), 404
 
-    movies.remove(movie)
+    # Дополнительная проверка на удаление
+    try:
+        movies.remove(movie)
+    except ValueError:
+        return jsonify({"error": "Failed to delete movie"}), 500
 
-    return jsonify({"message": "Movie deleted successfully", "movie": movie}), 200
+    return jsonify({
+        "message": "Movie deleted successfully",
+        "movie": movie
+    }), 200
+
 
 ICON_FOLDER = './uploaded_icons' 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(ICON_FOLDER, exist_ok=True)
 
 @app.route('/upload_icon', methods=['POST'])
 def upload_icon():
@@ -259,8 +267,6 @@ def get_report():
                 })
 
     return jsonify({"bookings": filtered_bookings}), 200
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
