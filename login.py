@@ -23,7 +23,7 @@ class LoginWindow(QWidget):
 
         # Фоновое изображение
         self.background_label = QLabel(self)
-        self.background_label.setPixmap(QPixmap("anime.jpg").scaled(
+        self.background_label.setPixmap(QPixmap("bka.jpg").scaled(
             self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
         ))
         self.background_label.setGeometry(0, 0, 800, 600)
@@ -31,16 +31,16 @@ class LoginWindow(QWidget):
         # Полупрозрачный затемняющий слой
         self.overlay = QLabel(self)
         self.overlay.setGeometry(0, 0, 800, 600)
-        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
+        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.0);")
         self.snowfall_background.create_snowflakes()
         self.snowfall_background.raise_()
 
 
         # Заголовок "SAKUNE"
-        self.title_label = QLabel("SAKUNE", self)
-        self.title_label.setFont(QFont("RocknRoll One", 42))
-        self.title_label.setStyleSheet("color: white;")
-        self.title_label.setAlignment(Qt.AlignCenter)
+        # self.title_label = QLabel("SAKUNE", self)
+        # self.title_label.setFont(QFont("RocknRoll One", 42))
+        # self.title_label.setStyleSheet("color: white;")
+        # self.title_label.setAlignment(Qt.AlignCenter)
 
         # Контейнер для формы
         self.form_container = QWidget(self)
@@ -139,7 +139,7 @@ class LoginWindow(QWidget):
         # Основной компоновщик для окна
         main_layout = QVBoxLayout(self)
         main_layout.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.title_label)
+        # main_layout.addWidget(self.title_label)
         main_layout.addWidget(self.form_container)
 
         
@@ -155,7 +155,7 @@ class LoginWindow(QWidget):
     
     def update_captcha_image(self):
         """Создает изображение с текстом капчи с искажениями"""
-        pixmap = QPixmap(200, 80)
+        pixmap = QPixmap(295, 60)
         pixmap.fill(QColor(255, 255, 255))
         painter = QPainter(pixmap)
         painter.setFont(QFont("Arial", 35))

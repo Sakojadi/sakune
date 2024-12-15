@@ -22,7 +22,7 @@ class SignUpWindow(QWidget):
 
         # Фоновое изображение
         self.background_label = QLabel(self)
-        self.background_label.setPixmap(QPixmap("anime.jpg").scaled(
+        self.background_label.setPixmap(QPixmap("bka.jpg").scaled(
             self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
         ))
         self.background_label.setGeometry(0, 0, 800, 600)
@@ -30,14 +30,14 @@ class SignUpWindow(QWidget):
         # Полупрозрачный затемняющий слой
         self.overlay = QLabel(self)
         self.overlay.setGeometry(0, 0, 800, 600)
-        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
+        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.0);")
         self.snowfall_background.create_snowflakes()
         self.snowfall_background.raise_()
 
-        self.title_label = QLabel("SAKUNE", self)
-        self.title_label.setFont(QFont("RocknRoll One", 42))
-        self.title_label.setStyleSheet("color: white;")
-        self.title_label.setAlignment(Qt.AlignCenter)
+        # self.title_label = QLabel("SAKUNE", self)
+        # self.title_label.setFont(QFont("RocknRoll One", 42))
+        # self.title_label.setStyleSheet("color: white;")
+        # self.title_label.setAlignment(Qt.AlignCenter)
         
         self.form_container = QWidget(self)
         self.form_container.setFixedSize(400, 360)
@@ -115,7 +115,7 @@ class SignUpWindow(QWidget):
         form_layout.setAlignment(Qt.AlignCenter)
         form_layout.setSpacing(15)
         form_layout.addWidget(self.sign_label)
-        form_layout.addWidget(self.title_label)
+        # form_layout.addWidget(self.title_label)
         # form_layout.addWidget(self.input)
         form_layout.addWidget(self.username_input)
         # form_layout.addWidget(self.input_password)
@@ -128,7 +128,7 @@ class SignUpWindow(QWidget):
         # Основной компоновщик для центрирования формы
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.title_label)
+        # layout.addWidget(self.title_label)
         layout.addWidget(self.form_container)  # Add the form container to the main layout
 
         # Register button click signal connection (only once)
