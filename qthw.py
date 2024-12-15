@@ -118,7 +118,7 @@ class MovieWindow(QWidget):
 
             # Кнопка фильма
             movie_button = QPushButton()
-            movie_button.setFixedSize(150, 220)
+            movie_button.setFixedSize(140, 220)
             movie_button.setStyleSheet("border: 0; background-color: black;")
             movie_button.clicked.connect(lambda checked, m=movie: self.show_movie_details(m))
 
@@ -129,7 +129,7 @@ class MovieWindow(QWidget):
             image_data = requests.get(image_url).content
 
             if pixmap.loadFromData(image_data):
-                movie_label.setPixmap(pixmap.scaled(150, 200, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+                movie_label.setPixmap(pixmap.scaled(140, 200, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
             else:
                 movie_label.setText("Ошибка загрузки изображения")
                 print(f"Не удалось загрузить изображение: {image_url}")
