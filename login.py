@@ -7,7 +7,7 @@ import sys
 import requests
 import random
 import string
-
+from snowflakes import SnowfallBackground
 
 API_URL = "https://sakojadi.pythonanywhere.com"
 # API_URL = "http://127.0.0.1:5000"
@@ -19,6 +19,7 @@ class LoginWindow(QWidget):
         # Настройка окна
         self.setWindowTitle("SAKUNE")
         self.setFixedSize(800, 600)
+        self.snowfall_background = SnowfallBackground(self)
 
         # Фоновое изображение
         self.background_label = QLabel(self)
@@ -31,6 +32,9 @@ class LoginWindow(QWidget):
         self.overlay = QLabel(self)
         self.overlay.setGeometry(0, 0, 800, 600)
         self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
+        self.snowfall_background.create_snowflakes()
+        self.snowfall_background.raise_()
+
 
         # Заголовок "SAKUNE"
         self.title_label = QLabel("SAKUNE", self)
@@ -143,6 +147,7 @@ class LoginWindow(QWidget):
         # Сигнал для открытия окна регистрации
         self.register_link.linkActivated.connect(self.open_signup_window)
         self.login_button.clicked.connect(self.login_user)
+
 
     def generate_captcha_text(self):
         """Генерирует случайный текст для капчи"""
