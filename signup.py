@@ -5,6 +5,7 @@ from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
 import sys
 import requests
+from snowflakes import SnowfallBackground
 
 API_URL = "https://sakojadi.pythonanywhere.com"
 # API_URL = "http://127.0.0.1:5000"
@@ -16,6 +17,8 @@ class SignUpWindow(QWidget):
         # Настройка окна
         self.setWindowTitle("SAKUNE")
         self.setFixedSize(800, 600)
+        self.snowfall_background = SnowfallBackground(self)
+
 
         # Фоновое изображение
         self.background_label = QLabel(self)
@@ -28,6 +31,8 @@ class SignUpWindow(QWidget):
         self.overlay = QLabel(self)
         self.overlay.setGeometry(0, 0, 800, 600)
         self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
+        self.snowfall_background.create_snowflakes()
+        self.snowfall_background.raise_()
 
         self.title_label = QLabel("SAKUNE", self)
         self.title_label.setFont(QFont("RocknRoll One", 42))
