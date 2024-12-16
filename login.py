@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox, QFileDialog
 )
-from PyQt5.QtGui import QPixmap, QFont, QPalette, QColor, QPainter, QTransform
+from PyQt5.QtGui import QPixmap, QFont, QPalette, QColor, QPainter, QTransform, QLinearGradient, QPen
 from PyQt5.QtCore import Qt
 import sys
 import requests
@@ -154,30 +154,64 @@ class LoginWindow(QWidget):
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     
     def update_captcha_image(self):
-        """Создает изображение с текстом капчи с искажениями"""
+        """Создает изображение с текстом капчи с искажениями и дополнительными эффектами"""
         pixmap = QPixmap(295, 60)
         pixmap.fill(QColor(255, 255, 255))
+
+        # Создаем painter для рисования
         painter = QPainter(pixmap)
-        painter.setFont(QFont("Arial", 35))
+        painter.setRenderHint(QPainter.Antialiasing)
 
-        # Искажение текста
+        # Фон: добавление легкого шума линий для сложности
+        for _ in range(5):
+            painter.setPen(QPen(QColor(random.randint(100, 150), random.randint(100, 150), random.randint(100, 150), 100), 2))
+            start_x = random.randint(0, 295)
+            start_y = random.randint(0, 60)
+            end_x = random.randint(0, 295)
+            end_y = random.randint(0, 60)
+            painter.drawLine(start_x, start_y, end_x, end_y)
+
+        # Рисование текста с искажениями
+        painter.setFont(QFont("Arial", 35, QFont.Bold))
         for i, char in enumerate(self.captcha_text):
-            # Случайные смещения по осям X и Y
             offset_x = random.randint(-3, 3)
-            offset_y = random.randint(-3, 3)
+            offset_y = random.randint(0, 1)
 
-            # Случайное вращение символа
             transform = QTransform()
-            transform.rotate(random.randint(-3, 3))  # Угол вращения символа
+            transform.rotate(random.randint(-5, 5))  # Умеренное вращение символов
 
-            painter.setPen(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))  # Случайный цвет текста
+            painter.setPen(QColor(50, 50, 50))  # Темно-серый цвет текста
             painter.setTransform(transform)
 
-            # Рисуем каждый символ с смещением и случайным углом
+            # Рисуем каждый символ
             painter.drawText(30 + i * 30 + offset_x, 50 + offset_y, char)
 
+        # Сбрасываем трансформацию для дальнейшего рисования
+        painter.setTransform(QTransform())
+
+        # Добавление тонких линий поверх текста
+        for _ in range(2):
+            painter.setPen(QPen(QColor(100, 100, 100, 150), 1))
+            start_x = random.randint(0, 295)
+            start_y = random.randint(0, 60)
+            end_x = random.randint(0, 295)
+            end_y = random.randint(0, 60)
+            painter.drawLine(start_x, start_y, end_x, end_y)
+
+        # Добавление легкого шума (точек)
+        for _ in range(500):
+            noise_x = random.randint(0, 295)
+            noise_y = random.randint(0, 60)
+            painter.setPen(QColor(random.randint(100, 200), random.randint(100, 200), random.randint(100, 200), 150))
+            painter.drawPoint(noise_x, noise_y)
+
+        # Завершаем рисование
         painter.end()
+
+        # Устанавливаем получившееся изображение на QLabel
         self.captcha_label.setPixmap(pixmap)
+
+
 
     def login_user(self):
         username = self.username_input.text()
